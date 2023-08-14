@@ -17,6 +17,8 @@ YELLOW = [255, 255, 0]
 BLOCK_SIZE = 30
 STEP = BLOCK_SIZE
 
+KEY_COOLDOWN = 500
+
 EDGE_RIGHT = 600
 EDGE_LEFT = 120
 EDGE_TOP = 120
@@ -147,14 +149,14 @@ def check_snake_apple_collision(snake:pygame.sprite.Group, apple:Apple):
     return False
 
 def game_over():
-    global snake, score, high_score, snake_length, play
+    global snake, score, high_score, snake_length, play, input
 
     play = False
-
-    if score > high_score: high_score = score
+    if score > high_score:
+        high_score = score
     score = 0
-
     snake_length = 3
+    input = RIGHT
 
     time.sleep(0.5)
 
@@ -184,6 +186,7 @@ for i in range(0, snake_length):
 
 apple = Apple()
 
+key_cooldown_timer = 0
 input = RIGHT
 
 
@@ -209,20 +212,24 @@ while running:
     snake_direction = snake.sprites()[0].direction
 
     key = pygame.key.get_pressed()
+
+    key_cooldown_timer += clock.get_time()
     
     if key[pygame.K_RETURN] and play == False:
         play = True
     
-    if key[pygame.K_SPACE]:
+    if key[pygame.K_SPACE] and key_cooldown_timer > KEY_COOLDOWN:
         if play:
             play = False
         else:
             play = True
-
+        
         if pause:
             pause = False
         else:
             pause = True
+        
+        key_cooldown_timer = 0
     
     if play:
         if key[pygame.K_UP] and snake_direction != DOWN:
@@ -257,12 +264,13 @@ while running:
         text = font.render("press ENTER to start" , False, WHITE)
         viewport.blit(text, [EDGE_RIGHT / 2 - 30, EDGE_BOTTOM / 2 + 20])
 
-    snake.sprites()[0].direction = input
-
     for event in pygame.event.get():
         
         if event.type == UPDATE and play:
+            snake.sprites()[0].direction = input
+            
             move_snake(snake)
+            
             if check_out_of_bounds(snake.sprites()[0]): game_over()
             if check_self_collision(snake): game_over()
         
