@@ -14,7 +14,7 @@ RED = [255, 0, 0]
 GREEN = [0, 255, 0]
 YELLOW = [255, 255, 0]
 
-BLOCK_SIZE = 30
+BLOCK_SIZE = 20
 STEP = BLOCK_SIZE
 
 KEY_COOLDOWN = 500
@@ -176,7 +176,7 @@ def game_over():
 
 running = True
 UPDATE = pygame.USEREVENT
-pygame.time.set_timer(UPDATE, 250)
+pygame.time.set_timer(UPDATE, 150)
 clock = pygame.time.Clock()
 
 snake = pygame.sprite.Group()
