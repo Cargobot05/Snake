@@ -162,6 +162,11 @@ def game_over():
 
     font = pygame.font.SysFont('Bahnschrift', 32, False, False)
     text = font.render("GAME OVER", True, RED)
+    backdrop_size = text.get_rect()
+    backdrop = pygame.Surface([backdrop_size.width, backdrop_size.height])
+    backdrop.fill(BLACK)
+
+    viewport.blit(backdrop, [EDGE_RIGHT / 2 - 20, EDGE_BOTTOM / 2 - 20])
     viewport.blit(text, [EDGE_RIGHT / 2 - 20, EDGE_BOTTOM / 2 - 20])
 
     pygame.display.flip()
@@ -211,24 +216,20 @@ while running:
 
     snake_direction = snake.sprites()[0].direction
 
-    key = pygame.key.get_pressed()
-
     key_cooldown_timer += clock.get_time()
+
+    key = pygame.key.get_pressed()
     
-    if key[pygame.K_RETURN] and play == False:
+    if key[pygame.K_RETURN] and play == False and pause == False:
         play = True
     
     if key[pygame.K_SPACE] and key_cooldown_timer > KEY_COOLDOWN:
-        if play:
+        if (play == True) and (pause == False):
             play = False
-        else:
-            play = True
-        
-        if pause:
-            pause = False
-        else:
             pause = True
-        
+        elif (play == False) and (pause == True):
+            play = True
+            pause = False
         key_cooldown_timer = 0
     
     if play:
