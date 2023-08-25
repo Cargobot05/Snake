@@ -72,13 +72,17 @@ class Apple():
         self.rect = self.image.get_rect()
     
     def generate(self):
+        overlap = False
         while self.exist == False:
             self.rect.x = random.randint(EDGE_LEFT // BLOCK_SIZE, EDGE_RIGHT // BLOCK_SIZE) * BLOCK_SIZE
             self.rect.y = random.randint(EDGE_TOP // BLOCK_SIZE, EDGE_BOTTOM // BLOCK_SIZE) * BLOCK_SIZE
 
             for segment in snake:
-                if self.rect.center != segment.rect.center and check_out_of_bounds(self) == False:
-                    self.exist = True
+                if self.rect.center == segment.rect.center or check_out_of_bounds(self) == True:
+                    overlap = True
+                if overlap: break
+
+            if overlap == False: self.exist == True
 
 
 
