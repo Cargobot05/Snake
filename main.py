@@ -76,9 +76,10 @@ class Apple():
             self.rect.x = random.randint(EDGE_LEFT // BLOCK_SIZE, EDGE_RIGHT // BLOCK_SIZE) * BLOCK_SIZE
             self.rect.y = random.randint(EDGE_TOP // BLOCK_SIZE, EDGE_BOTTOM // BLOCK_SIZE) * BLOCK_SIZE
 
+            self.exist = True
             for segment in snake:
-                if self.rect.center != segment.rect.center and check_out_of_bounds(self) == False:
-                    self.exist = True
+                if self.rect.center == segment.rect.center and check_out_of_bounds(self):
+                    self.exist = False
 
 
 
