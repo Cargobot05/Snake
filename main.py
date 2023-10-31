@@ -73,8 +73,8 @@ class Apple():
     
     def generate(self):
         while self.exist == False:
-            self.rect.x = random.randint(EDGE_LEFT // BLOCK_SIZE, EDGE_RIGHT // BLOCK_SIZE) * BLOCK_SIZE
-            self.rect.y = random.randint(EDGE_TOP // BLOCK_SIZE, EDGE_BOTTOM // BLOCK_SIZE) * BLOCK_SIZE
+            self.rect.x = (random.randint(EDGE_LEFT // BLOCK_SIZE, (EDGE_RIGHT // BLOCK_SIZE)-1)) * BLOCK_SIZE
+            self.rect.y = (random.randint(EDGE_TOP // BLOCK_SIZE, (EDGE_BOTTOM // BLOCK_SIZE)-1)) * BLOCK_SIZE
 
             self.exist = True
             for segment in snake:
