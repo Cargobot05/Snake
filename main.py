@@ -70,15 +70,24 @@ class Apple():
         self.image = pygame.Surface([BLOCK_SIZE, BLOCK_SIZE])
         self.image.fill(RED)
         self.rect = self.image.get_rect()
+        self.type = "red"
     
     def generate(self):
+        golden_chance = random.randint(1, 10)
+        if golden_chance == 7:
+            self.image.fill(YELLOW)
+            self.type = "golden"
+        else:
+            self.image.fill(RED)
+            self.type = "red"
+        
         while self.exist == False:
             self.rect.x = (random.randint(EDGE_LEFT // BLOCK_SIZE, (EDGE_RIGHT // BLOCK_SIZE)-1)) * BLOCK_SIZE
             self.rect.y = (random.randint(EDGE_TOP // BLOCK_SIZE, (EDGE_BOTTOM // BLOCK_SIZE)-1)) * BLOCK_SIZE
 
             self.exist = True
             for segment in snake:
-                if self.rect.center == segment.rect.center and check_out_of_bounds(self):
+                if self.rect.center == segment.rect.center or check_out_of_bounds(self):
                     self.exist = False
 
 
@@ -149,7 +158,7 @@ def check_snake_apple_collision(snake:pygame.sprite.Group, apple:Apple):
             return True
     return False
 
-def game_over():
+def game_end(game_over, game_win):
     global snake, score, high_score, snake_length, play, input
 
     play = False
@@ -161,14 +170,17 @@ def game_over():
 
     time.sleep(0.5)
 
-    font = pygame.font.SysFont('Bahnschrift', 32, False, False)
-    text = font.render("GAME OVER", True, RED)
+    font = pygame.font.SysFont('Bahnschrift', 64, False, False)
+    if game_win:
+        text = font.render("YOU WON", True, YELLOW)
+    if game_over:
+        text = font.render("GAME OVER", True, RED)
     backdrop_size = text.get_rect()
     backdrop = pygame.Surface([backdrop_size.width, backdrop_size.height])
     backdrop.fill(BLACK)
 
-    viewport.blit(backdrop, [EDGE_RIGHT / 2 - 20, EDGE_BOTTOM / 2 - 20])
-    viewport.blit(text, [EDGE_RIGHT / 2 - 20, EDGE_BOTTOM / 2 - 20])
+    viewport.blit(backdrop, [VIEWPORT_SIZE // 2 - backdrop_size.width // 2, VIEWPORT_SIZE // 2 - backdrop_size.height // 2])
+    viewport.blit(text, [VIEWPORT_SIZE // 2 - backdrop_size.width // 2, VIEWPORT_SIZE // 2 - backdrop_size.height // 2])
 
     pygame.display.flip()
 
@@ -181,9 +193,9 @@ def game_over():
 
 
 running = True
+clock = pygame.time.Clock()
 UPDATE = pygame.USEREVENT
 pygame.time.set_timer(UPDATE, 150)
-clock = pygame.time.Clock()
 
 snake = pygame.sprite.Group()
 for i in range(0, snake_length):   
@@ -192,26 +204,29 @@ for i in range(0, snake_length):
 
 apple = Apple()
 
-key_cooldown_timer = 0
-input = RIGHT
+game_over = False
+game_win = False
 
+key_cooldown_timer = 0
+golden_buff = 0
+input = RIGHT
 
 while running:
     viewport.fill(BLACK)
     font = pygame.font.SysFont('Bahnschrift', 54, False, False)
     text = font.render("S N A K E" , False, GREEN)
-    viewport.blit(text, [EDGE_RIGHT / 2 - 55, 20])
+    viewport.blit(text, [VIEWPORT_SIZE // 2 - text.get_rect().width // 2, 20])
 
     font = pygame.font.SysFont('Bahnschrift', 24, False, False)
     text = font.render(f"SCORE: {score}" , False, WHITE)
-    viewport.blit(text, [EDGE_LEFT, EDGE_TOP - 25])
+    viewport.blit(text, [EDGE_LEFT, EDGE_TOP - text.get_rect().height])
     
     text = font.render(f"HIGH: {high_score}" , False, WHITE)
-    viewport.blit(text, [EDGE_RIGHT - 85, EDGE_TOP - 25])
+    viewport.blit(text, [EDGE_RIGHT - text.get_rect().width, EDGE_TOP - text.get_rect().height])
 
     font = pygame.font.SysFont('Bahnschrift', 20, False, False)
     text = font.render("press SPACE to pause" , False, WHITE)
-    viewport.blit(text, [EDGE_RIGHT / 2 - 30, EDGE_BOTTOM + 20])
+    viewport.blit(text, [VIEWPORT_SIZE // 2 - text.get_rect().width // 2, EDGE_BOTTOM + text.get_rect().height])
 
     arena = pygame.draw.rect(viewport, WHITE, (EDGE_LEFT, EDGE_TOP, 480, 480), 1)
 
@@ -245,26 +260,20 @@ while running:
 
         snake.draw(viewport)
 
-        if check_snake_apple_collision(snake, apple) == True:
-            apple.exist = False
-            score += 1
-            snake_add(snake)
-            snake_length += 1
-
         if apple.exist == False:
             apple.generate()
             
         viewport.blit(apple.image, [apple.rect.x, apple.rect.y])
 
-    elif (pause):
+    elif pause:
         font = pygame.font.SysFont('Bahnschrift', 32, False, False)
         text = font.render("PAUSED", True, YELLOW)
-        viewport.blit(text, [EDGE_RIGHT / 2 + 5, EDGE_BOTTOM / 2 - 20])
+        viewport.blit(text, [VIEWPORT_SIZE // 2 - text.get_rect().width // 2, VIEWPORT_SIZE // 2 - text.get_rect().height // 2])
 
     else:
         font = pygame.font.SysFont('Bahnschrift', 20, False, False)
         text = font.render("press ENTER to start" , False, WHITE)
-        viewport.blit(text, [EDGE_RIGHT / 2 - 30, EDGE_BOTTOM / 2 + 20])
+        viewport.blit(text, [VIEWPORT_SIZE // 2 - text.get_rect().width // 2 , VIEWPORT_SIZE // 2 - text.get_rect().height // 2])
 
     for event in pygame.event.get():
         
@@ -272,9 +281,33 @@ while running:
             snake.sprites()[0].direction = input
             
             move_snake(snake)
+
+            if check_snake_apple_collision(snake, apple) == True:
+                apple.exist = False
+                if apple.type == "golden":
+                    score += 7
+                    golden_buff = 7
+                else:
+                    score += 1
+                    snake_add(snake)
+                    snake_length += 1
             
-            if check_out_of_bounds(snake.sprites()[0]): game_over()
-            if check_self_collision(snake): game_over()
+            if (golden_buff != 0):
+                snake_add(snake)
+                snake_length += 1
+                golden_buff -= 1
+            
+            if check_out_of_bounds(snake.sprites()[0]): game_over = True
+            if check_self_collision(snake): game_over = True
+            
+            if score == 841:
+                play = False
+                game_win = True
+            
+            if (game_win or game_over):
+                game_end(game_over, game_win)
+                game_over = False
+                game_win = False
         
         if event.type == pygame.QUIT or key[pygame.K_ESCAPE]:
             pygame.quit()
