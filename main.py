@@ -170,11 +170,10 @@ def game_end(game_over, game_win):
 
     time.sleep(0.5)
 
-    font = pygame.font.SysFont('Bahnschrift', 64, False, False)
     if game_win:
-        text = font.render("YOU WON", True, YELLOW)
+        text = large_font.render("YOU WON", True, YELLOW)
     if game_over:
-        text = font.render("GAME OVER", True, RED)
+        text = large_font.render("GAME OVER", True, RED)
     backdrop_size = text.get_rect()
     backdrop = pygame.Surface([backdrop_size.width, backdrop_size.height])
     backdrop.fill(BLACK)
@@ -191,11 +190,13 @@ def game_end(game_over, game_win):
         new_segment = Segment(360- i*BLOCK_SIZE, 360, RIGHT)
         snake.add(new_segment)
 
-
-running = True
-clock = pygame.time.Clock()
 UPDATE = pygame.USEREVENT
 pygame.time.set_timer(UPDATE, 150)
+
+clock = pygame.time.Clock()
+
+medium_font = pygame.font.SysFont('Bahnschrift', 24, False, False)
+large_font = pygame.font.SysFont('Bahnschrift', 64, False, False)
 
 snake = pygame.sprite.Group()
 for i in range(0, snake_length):   
@@ -209,26 +210,27 @@ game_win = False
 
 key_cooldown_timer = 0
 golden_buff = 0
+
 input = RIGHT
+
+running = True
 
 while running:
     viewport.fill(BLACK)
-    font = pygame.font.SysFont('Bahnschrift', 54, False, False)
-    text = font.render("S N A K E" , False, GREEN)
+    
+    text = large_font.render("S N A K E" , False, GREEN)
     viewport.blit(text, [VIEWPORT_SIZE // 2 - text.get_rect().width // 2, 20])
 
-    font = pygame.font.SysFont('Bahnschrift', 24, False, False)
-    text = font.render(f"SCORE: {score}" , False, WHITE)
+    text = medium_font.render(f"SCORE: {score}" , False, WHITE)
     viewport.blit(text, [EDGE_LEFT, EDGE_TOP - text.get_rect().height])
     
-    text = font.render(f"HIGH: {high_score}" , False, WHITE)
+    text = medium_font.render(f"HIGH: {high_score}" , False, WHITE)
     viewport.blit(text, [EDGE_RIGHT - text.get_rect().width, EDGE_TOP - text.get_rect().height])
 
-    font = pygame.font.SysFont('Bahnschrift', 20, False, False)
-    text = font.render("press SPACE to pause" , False, WHITE)
+    text = medium_font.render("press SPACE to pause" , False, WHITE)
     viewport.blit(text, [VIEWPORT_SIZE // 2 - text.get_rect().width // 2, EDGE_BOTTOM + text.get_rect().height])
 
-    arena = pygame.draw.rect(viewport, WHITE, (EDGE_LEFT, EDGE_TOP, 480, 480), 1)
+    arena = pygame.draw.rect(viewport, WHITE, (EDGE_LEFT - 2, EDGE_TOP - 2, 484, 484), 1)
 
     snake_direction = snake.sprites()[0].direction
 
@@ -266,13 +268,11 @@ while running:
         viewport.blit(apple.image, [apple.rect.x, apple.rect.y])
 
     elif pause:
-        font = pygame.font.SysFont('Bahnschrift', 32, False, False)
-        text = font.render("PAUSED", True, YELLOW)
+        text = large_font.render("PAUSED", True, YELLOW)
         viewport.blit(text, [VIEWPORT_SIZE // 2 - text.get_rect().width // 2, VIEWPORT_SIZE // 2 - text.get_rect().height // 2])
 
     else:
-        font = pygame.font.SysFont('Bahnschrift', 20, False, False)
-        text = font.render("press ENTER to start" , False, WHITE)
+        text = medium_font.render("press ENTER to start" , False, WHITE)
         viewport.blit(text, [VIEWPORT_SIZE // 2 - text.get_rect().width // 2 , VIEWPORT_SIZE // 2 - text.get_rect().height // 2])
 
     for event in pygame.event.get():
